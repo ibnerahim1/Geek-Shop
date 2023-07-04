@@ -11,6 +11,8 @@ using UnityEngine.AI;
 public class GameManager : MonoBehaviour
 {
     public bool gameStarted;
+    public Transform[] comicsObj, merchsObj, clothesObj;
+    public int comicLevel, merchLevel, clothLevel;
     public Transform AIObj;
     public int cash;
     public AudioSource soundfx;
