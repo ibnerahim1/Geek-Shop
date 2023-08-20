@@ -4,14 +4,12 @@
 TagManager:
   serializedVersion: 2
   tags:
-  - unlock
-  - source
-  - destination
+  - Counter
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - Ground
   - Water
   - UI
   - 
