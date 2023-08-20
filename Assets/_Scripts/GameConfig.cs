@@ -1,7 +1,7 @@
 namespace Game.Data
 {
 
-    public class GameConfig
+    public static class GameConfig
     {
         public static class PlayerSettings
         {
@@ -24,7 +24,7 @@ namespace Game.Data
 
         public static class CounterSettings
         {
-            public static int ProductionQTY;
+            public static int ProductionQTY = 24;
             public static float ProductionSpeed = 0.1f;
         }
     }

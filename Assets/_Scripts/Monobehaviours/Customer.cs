@@ -9,7 +9,7 @@ using Game.Tools;
 
 public class Customer : Character, IPoolable
 {
-    private CustomersManager m_CustomersManager => CustomersManager.Instance;
+    private LevelManager m_LevelManager => LevelManager.Instance;
     private PoolManager m_PoolManager => PoolManager.Instance;
 
     public List<Counter> m_requiredCounters = new List<Counter>();
@@ -37,7 +37,7 @@ public class Customer : Character, IPoolable
     {
         base.Update();
 
-        if (m_CharacterState == CharacterState.Moving && Vector3.Distance(transform.position, m_Destination) > 0.1f)
+        if (m_CharacterState == CharacterState.Moving && m_NavMeshAgent.path.corners.Length > 1 && Vector3.Distance(transform.position, m_Destination) > 0.1f)
         {
             transform.DOLookAt(new Vector3(m_NavMeshAgent.path.corners[1].x, transform.position.y, m_NavMeshAgent.path.corners[1].z), 0.2f).SetEase(Ease.Linear);
         }
@@ -102,13 +102,13 @@ public class Customer : Character, IPoolable
     {
         m_requiredCounters.Clear();
         List<Counter> tempRequiredCounter = new List<Counter>();
-        for (int i = 0; i < m_CustomersManager.DisplayCounters.Count; i++)
+        for (int i = 0; i < DisplayCounter.Counters.Count; i++)
         {
-            tempRequiredCounter.Add(m_CustomersManager.DisplayCounters[i]);
+            tempRequiredCounter.Add(DisplayCounter.Counters[i]);
         }
-        for (int i = 0; i < m_CustomersManager.DisplayProps.Count; i++)
+        for (int i = 0; i < DisplayProp.Counters.Count; i++)
         {
-            tempRequiredCounter.Add(m_CustomersManager.DisplayProps[i]);
+            tempRequiredCounter.Add(DisplayProp.Counters[i]);
         }
         for (int i = 0; i < Random.Range(0, Mathf.Min(6, tempRequiredCounter.Count)) + 1; i++)
         {
@@ -129,7 +129,7 @@ public class Customer : Character, IPoolable
                 }
                 break;
             case CustomerState.WaitingForBilling:
-                if(m_CustomersManager.GetCashCounter(out CashCounter result))
+                if(m_LevelManager.GetCashCounter(out CashCounter result))
                 {
                     m_CashCounter = result;
                     setDestination(result.GetComponent<CashCounter>().GetPosition(this));
@@ -140,7 +140,7 @@ public class Customer : Character, IPoolable
             case CustomerState.DoneBilling:
                 if(Vector3.Distance(transform.position, spawnPosition) < 0.1f)
                 {
-                    m_CustomersManager.HasExit(this);
+                    m_LevelManager.HasExit(this);
                 }
                 else
                     setDestination(spawnPosition);
@@ -260,10 +260,11 @@ public class Customer : Character, IPoolable
     }
     private void PayBill()
     {
-        if (m_CustomerState == CustomerState.WaitingForBilling)
+
+        if (m_CustomerState == CustomerState.WaitingForBilling && m_CashCounter.CashiersNearby > 0)
         {
-            m_CurrentCounter.GetComponent<CashCounter>().TryToPayBill(5, m_PoolManager.Dequeue(PoolType.Cash, transform.position + Vector3.up, Quaternion.identity, m_CurrentCounter.transform).GetComponent<IItem>());
-            this.DelayedAction(() => m_CashCounter.RemoveCustomer(this), 0.2f);
+            m_CashCounter.PayBill(5, m_PoolManager.Dequeue(PoolType.Cash, transform.position + Vector3.up, Quaternion.identity, m_CurrentCounter.transform).GetComponent<IItem>());
+            this.DelayedAction(() => m_CashCounter.RemoveCustomer(this), 1);
             SwitchCustomerState(CustomerState.DoneBilling);
             exitPreviousCounter();
             calulateTarget();

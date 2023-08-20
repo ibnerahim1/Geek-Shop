@@ -86,7 +86,6 @@ namespace Game.Managers
         public GameData LoadData()
         {
             string filePath = Path.Combine(Application.persistentDataPath, $"{typeof(GameData)}.json");
-            print(filePath);
 
             if (File.Exists(filePath))
             {
@@ -143,7 +142,7 @@ namespace Game.Managers
         public float MusicVolume = 0.6f;
         public bool UseHaptic = true;
 
-        public int PlayerWallet = 500;
+        public int PlayerWallet = 5000;
         public int PlayerSpeedLevel = 0;
         public int PlayerStackLevel = 0;
         public int VIPLevel = 0;

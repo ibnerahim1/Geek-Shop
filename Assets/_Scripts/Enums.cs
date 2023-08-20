@@ -39,6 +39,6 @@ public enum ItemType
 
 public enum eTags
 {
-    Counter
-
+    Counter,
+    UnlockArea
 }

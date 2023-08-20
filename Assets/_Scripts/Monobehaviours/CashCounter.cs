@@ -3,21 +3,24 @@ using UnityEngine;
 using UnityEngine.UI;
 using DG.Tweening;
 using TMPro;
-using Game.Tools;
 using Game.Interfaces;
+using Game.Managers;
+using Game.Tools;
 
 public class CashCounter : Counter, IUnlockable
 {
+    public static List<CashCounter> Counters { get; internal set; } = new List<CashCounter>();
+
     [Min(1), SerializeField] private int UnlockCost;
     public int PaidAmount { get; internal set; }
     public int CashCollected { get; internal set; }
+    public int CashiersNearby { get; internal set; }
 
     public delegate void CounterUnlocked(CashCounter cashCounter);
     public static CounterUnlocked OnCashCounterUnlocked;
 
     private Vector3 m_Extent;
     private int m_UnlockIndex;
-    private bool m_CashierAvailable;
     public List<Customer> m_Customers { get; internal set; } = new List<Customer>();
 
     #region SetRefs
@@ -80,22 +83,16 @@ public class CashCounter : Counter, IUnlockable
         }
         return value;
     }
-    public bool TryToPayBill(int cash, IItem item)
+    public void PayBill(int cash, IItem item)
     {
-        if (m_CashierAvailable)
-        {
-            CashCollected += cash;
-            ItemIn(item);
-            return true;
-        }
-        else
-            return false;
+        CashCollected += cash;
+        ItemIn(item);
     }
 
     public void Unlock()
     {
-        Debug.Log($"{name} has been unlocked!");
-        OnCashCounterUnlocked?.Invoke(this);
+        Counters.Add(this);
+        LevelManager.BuildNavMesh();
 
         m_BoxCollider.size = m_Extent;
         m_Canvas.SetActive(false);
@@ -108,12 +105,28 @@ public class CashCounter : Counter, IUnlockable
         base.OnPlayerEnter();
 
         m_Canvas.transform.DOScale(Vector3.one * 1.5f, 0.2f).SetEase(Ease.OutCubic);
+        CashiersNearby++;
     }
     public override void OnPlayerExit()
     {
         base.OnPlayerExit();
 
         m_Canvas.transform.DOScale(Vector3.one, 0.2f).SetEase(Ease.Linear);
+        CashiersNearby--;
+    }
+    public void OnBotEnter()
+    {
+        base.OnPlayerEnter();
+
+        m_Canvas.transform.DOScale(Vector3.one * 1.5f, 0.2f).SetEase(Ease.OutCubic);
+        CashiersNearby++;
+    }
+    public void OnBotExit()
+    {
+        base.OnPlayerExit();
+
+        m_Canvas.transform.DOScale(Vector3.one, 0.2f).SetEase(Ease.Linear);
+        CashiersNearby--;
     }
     public Vector3 GetPosition(Customer customer)
     {

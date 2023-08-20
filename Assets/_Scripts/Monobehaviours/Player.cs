@@ -124,6 +124,10 @@ public class Player : Character
         {
             Pickup();
         }
+        if (m_CurrentCounter.GetComponent<AreaUnlock>())
+        {
+            tryUnlock();
+        }
     }
 
     private void Pickup()

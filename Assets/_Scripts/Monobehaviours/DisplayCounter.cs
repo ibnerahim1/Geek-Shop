@@ -1,19 +1,19 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using DG.Tweening;
 using TMPro;
 using Game.Interfaces;
+using Game.Managers;
 using Game.Tools;
 
 public class DisplayCounter : Counter, IUnlockable
 {
+    public static List<DisplayCounter> Counters { get; internal set; } = new List<DisplayCounter>();
+
     [Min(1), SerializeField] private int UnlockCost;
     public int PaidAmount { get; internal set; }
-    public int Capacity;
-
-    public delegate void CounterUnlocked(DisplayCounter displayCounter);
-    public static CounterUnlocked OnDisplayCounterUnlocked;
-
+    
     private Vector3 m_Extent;
     private int m_UnlockIndex;
 
@@ -42,6 +42,11 @@ public class DisplayCounter : Counter, IUnlockable
     private void OnValidate()
     {
         SetReferences();
+    }
+
+    private void Awake()
+    {
+        Counters = new List<DisplayCounter>();
     }
 
     public void Initialize(int i_Index)
@@ -80,8 +85,9 @@ public class DisplayCounter : Counter, IUnlockable
 
     public void Unlock()
     {
-        Debug.Log($"{name} has been unlocked!");
-        OnDisplayCounterUnlocked?.Invoke(this);
+        Counters.Add(this);
+        this.DelayedAction(()=> LevelManager.BuildNavMesh(), 0.2f);
+        ProductionCounter.Produce(ItemType, Index);
 
         m_BoxCollider.size = m_Extent;
         m_Canvas.SetActive(false);

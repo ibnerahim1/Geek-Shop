@@ -38,9 +38,9 @@ public class Item : MonoBehaviour, IItem, IPoolable
     {
         for (int i = 0; i < transform.childCount; i++)
         {
-            transform.GetChild(i).SetChildActive();
+            transform.GetChild(i).SetChildActive(); // By default disables all child objects
         }
-        transform.SetChildActive();
+        transform.SetChildActive(); // By default disables all child objects
 
         switch (ItemType)
         {

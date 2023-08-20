@@ -17,9 +17,6 @@ public class Counter : MonoBehaviour, IItemStacker
     protected StorageManager m_StorageManager => StorageManager.Instance;
     protected Stack<IItem> m_ItemStack = new Stack<IItem>();
 
-    public delegate void StockEmpty(DisplayCounter displayCounter);
-    public static event StockEmpty OnStockEmpty;
-
     #region SetRefs
     private Transform m_StackPoint;
     private Image m_Outline;
@@ -59,15 +56,13 @@ public class Counter : MonoBehaviour, IItemStacker
                 return false;
             }
             item = result;
-            if (m_ItemStack.Count < 1 && GetComponent<DisplayCounter>())
-            {
-                print("hi");
-                OnStockEmpty?.Invoke(GetComponent<DisplayCounter>());
-            }
             return true;
         }
         else
+        {
+            ProductionCounter.Produce(ItemType, Index);
             return false;
+        }
     }
     #endregion
 }
