@@ -22,7 +22,7 @@ public class Cash : MonoBehaviour, IItem, IPoolable
         transform.parent = i_StackPoint.GetChild(i_LastIndex % i_StackPoint.childCount);
 
         transform.DOLocalJump(Vector3.up * (i_LastIndex / i_StackPoint.childCount) * m_StackOffset, 2, 1, 0.5f).SetEase(Ease.InOutCubic);
-        transform.DOLocalRotate(Vector3.zero, 0.5f).SetEase(Ease.InOutCubic);
+        transform.DOLocalRotate(Vector3.zero, 0.2f).SetEase(Ease.InOutCubic);
     }
 
     public void OnItemOut()

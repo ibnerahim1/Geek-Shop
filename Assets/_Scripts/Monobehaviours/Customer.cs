@@ -46,9 +46,16 @@ public class Customer : Character, IPoolable
     {
         base.Update();
 
-        if (m_CharacterState == eCharacterState.Moving && m_NavMeshAgent.path.corners.Length > 1 && Vector3.Distance(transform.position, m_Destination) > 0.1f)
+        if(m_CharacterState == eCharacterState.Moving)
         {
-            transform.DOLookAt(new Vector3(m_NavMeshAgent.path.corners[1].x, transform.position.y, m_NavMeshAgent.path.corners[1].z), 0.2f).SetEase(Ease.Linear);
+            if(Vector3.Distance(transform.position, m_Destination) < m_NavMeshAgent.stoppingDistance)
+            {
+                arrivedAtDestination();
+            }
+            else if (m_CharacterState == eCharacterState.Moving && m_NavMeshAgent.path.corners.Length > 1)
+            {
+                transform.DOLookAt(new Vector3(m_NavMeshAgent.path.corners[1].x, transform.position.y, m_NavMeshAgent.path.corners[1].z), 0.1f).SetEase(Ease.Linear);
+            }
         }
         if (m_NavMeshAgent.path.corners.Length > 1)
         {
@@ -58,15 +65,7 @@ public class Customer : Character, IPoolable
             }
         }
 
-        if(m_CurrentCounter == null)
-        {
-            if (Time.time > routeTime + 1 && Vector3.Distance(transform.position, m_Destination) < 0.1f)
-            {
-                routeTime = Time.time;
-                calulateTarget();
-            }
-        }
-        else
+        if(m_CurrentCounter != null)
         {
             if (Time.time > StackTimer + 0.1f)
             {
@@ -83,7 +82,7 @@ public class Customer : Character, IPoolable
 
         if (m_CharacterState == eCharacterState.Moving)
         {
-            if(Vector3.Distance(transform.position, m_Destination) > 0.1f)
+            if(Vector3.Distance(transform.position, m_Destination) > m_NavMeshAgent.stoppingDistance)
                 m_Rigidbody.velocity = transform.forward * GameConfig.CustomerSettings.CustomerSpeed;
         }
     }
@@ -117,35 +116,63 @@ public class Customer : Character, IPoolable
             case eCustomerState.Shopping:
                 if (TargetPoints.Count > 0)
                 {
-                    setDestination(TargetPoints[0].transform.position);
+                    SetDestination(TargetPoints[0].transform.position);
                 }
                 break;
             case eCustomerState.WaitingForBilling:
-                if (m_LevelManager.GetCashCounter(out CashCounter result))
+                if (m_LevelManager.GetCashCounter(out CashCounter result) && !m_CurrentCounter)
                 {
-                    setDestination(result.GetComponent<CashCounter>().GetPosition(this));
+                    m_CurrentCounter = result;
+                    SetDestination(result.GetComponent<CashCounter>().GetPosition(this));
                 }
                 break;
             case eCustomerState.Billing:
                 break;
             case eCustomerState.DoneBilling:
-                if (Vector3.Distance(transform.position, spawnPosition) < 0.1f)
-                {
-                    m_LevelManager.HasExit(this);
-                }
-                else
-                    setDestination(spawnPosition);
                 break;
 
             default:
                 break;
         }
     }
-    private void setDestination(Vector3 i_Position)
+    public void SetDestination(Vector3 i_Position)
     {
         m_Destination = i_Position;
         m_NavMeshAgent.SetDestination(m_Destination);
         startMoving();
+    }
+
+    private void arrivedAtDestination()
+    {
+        switch (m_CustomerState)
+        {
+            case eCustomerState.Shopping:
+                if (IsCurrentRequiredCounter(TargetPoints[0].GetComponent<Counter>()))
+                {
+                    ServiceQty = Random.Range(1, 4);
+                    m_CurrentCounter = TargetPoints[0];
+                    StackTimer = 0;
+                    stopMoving();
+                    if (m_CurrentCounter.CounterType == eCounterType.Display)
+                        m_TotalBill += m_CurrentCounter.m_DisplayCounter.SellingPrice * ServiceQty;
+                }
+                break;
+            case eCustomerState.WaitingForBilling:
+                transform.DOLookAt(transform.position + Vector3.back, 0.1f).SetEase(Ease.Linear);
+                if(m_CurrentCounter.m_CashCounter.IsFirstInQueue(this))
+                {
+                    StackTimer = 0;
+                    SwitchCustomerState(eCustomerState.Billing);
+                    m_Rigidbody.isKinematic = true;
+                    stopMoving();
+                }
+                break;
+            case eCustomerState.Billing:
+                break;
+            case eCustomerState.DoneBilling:
+                    m_LevelManager.HasExit(this);
+                break;
+        }
     }
 
     private void startMoving()
@@ -169,17 +196,6 @@ public class Customer : Character, IPoolable
     private void SwitchCustomerState(eCustomerState customerState)
     {
         m_CustomerState = customerState;
-        switch (customerState)
-        {
-            case eCustomerState.Shopping:
-                break;
-            case eCustomerState.WaitingForBilling:
-                break;
-            case eCustomerState.Billing:
-                break;
-            case eCustomerState.DoneBilling:
-                break;
-        }
     }
     #endregion
 
@@ -201,33 +217,6 @@ public class Customer : Character, IPoolable
         spawnPosition = transform.position;
         SwitchCustomerState(eCustomerState.Shopping);
         this.DelayedAction(()=>calulateTarget(), 0.1f);
-    }
-    #endregion
-
-    #region Physics
-    private void OnTriggerEnter(Collider other)
-    {
-        if (other.CompareTag(nameof(eTags.Interactable)))
-        {
-            if (m_CustomerState == eCustomerState.Shopping)
-            {
-                if (IsCurrentRequiredCounter(other.GetComponent<Counter>()))
-                {
-                    ServiceQty = Random.Range(1, 4);
-                    m_CurrentCounter = other.GetComponent<Counter>();
-                    StackTimer = 0;
-                    stopMoving();
-                    if (m_CurrentCounter.CounterType == eCounterType.Display)
-                        m_TotalBill += m_CurrentCounter.m_DisplayCounter.SellingPrice * ServiceQty;
-                }
-            }
-            if (m_CustomerState == eCustomerState.WaitingForBilling)
-            {
-                m_CurrentCounter = other.GetComponent<Counter>();
-                StackTimer = 0;
-                stopMoving();
-            }
-        }
     }
     #endregion
 
@@ -281,7 +270,7 @@ public class Customer : Character, IPoolable
 
     private void PayBill()
     {
-        if (m_CustomerState == eCustomerState.WaitingForBilling && m_CurrentCounter.m_CashCounter.CashiersNearby > 0)
+        if (m_CustomerState == eCustomerState.Billing && m_CurrentCounter.m_CashCounter.CashiersNearby > 0)
         {
             if (m_PaidBill < m_TotalBill)
             {
@@ -293,8 +282,9 @@ public class Customer : Character, IPoolable
             {
                 m_CurrentCounter.m_CashCounter.RemoveCustomer(this);
                 SwitchCustomerState(eCustomerState.DoneBilling);
+                m_Rigidbody.isKinematic = false;
                 exitPreviousCounter();
-                calulateTarget();
+                SetDestination(spawnPosition);
             }
         }
     }

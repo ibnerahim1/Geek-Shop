@@ -132,15 +132,8 @@ public class CashCounter : Counter, IUnlockable
     }
     public Vector3 GetPosition(Customer customer)
     {
-        if (m_Customers.Contains(customer))
-        {
-            return transform.position + transform.forward * (m_Customers.IndexOf(customer) + 1);
-        }
-        else
-        {
-            m_Customers.Add(customer);
-            return transform.position + transform.forward * (m_Customers.Count);
-        }
+        m_Customers.Add(customer);
+        return transform.position + transform.forward * 1.5f * (m_Customers.Count + 1.5f);
     }
     public void RemoveCustomer(Customer customer)
     {
@@ -149,9 +142,13 @@ public class CashCounter : Counter, IUnlockable
             m_Customers.Remove(customer);
             for (int i = 0; i < m_Customers.Count; i++)
             {
-                m_Customers[i].calulateTarget();
+                m_Customers[i].SetDestination(transform.position + transform.forward * 1.5f * (i + 2.5f));
             }
         }, 1);
+    }
+    public bool IsFirstInQueue(Customer i_Customer)
+    {
+        return m_Customers.Count > 0 ? m_Customers[0] == i_Customer : false;
     }
     #endregion
 }
