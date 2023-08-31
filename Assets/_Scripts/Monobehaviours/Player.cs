@@ -3,15 +3,24 @@ using DG.Tweening;
 using Game.Interfaces;
 using Game.Managers;
 using Game.Data;
+using Game.Tools;
 
 public class Player : Character
 {
-    private InputManager m_InputManager => InputManager.Instance;
-    private StorageManager m_StorageManager => StorageManager.Instance;
-    private PoolManager m_PoolManager => PoolManager.Instance;
+    #region Public Properties
+    #endregion
+
+    #region Private Properties
+        #region References
+        private InputManager m_InputManager => InputManager.Instance;
+        private StorageManager m_StorageManager => StorageManager.Instance;
+        private PoolManager m_PoolManager => PoolManager.Instance;
+        #endregion
 
     private int m_Wallet;
+    #endregion
 
+    #region Init
     protected override void Start()
     {
         base.Start();
@@ -28,16 +37,17 @@ public class Player : Character
         InputManager.OnMouseDown -= startMoving;
         InputManager.OnMouseUp -= stopMoving;
     }
+    #endregion
 
+    #region Updates
     protected override void Update()
     {
         base.Update();
 
-        if (m_CharacterState == CharacterState.Moving && m_InputManager.Drag.sqrMagnitude > 0.01f)
+        if (m_CharacterState == eCharacterState.Moving && m_InputManager.Drag.sqrMagnitude > 0.01f)
         {
             transform.DOLookAt(transform.position + Helpers.MainCamera.transform.right * m_InputManager.Drag.x + new Vector3(Helpers.MainCamera.transform.forward.x, 0, Helpers.MainCamera.transform.forward.z) * m_InputManager.Drag.y, 0.1f).SetEase(Ease.Linear);
         }
-
         if(m_CurrentCounter != null && Time.time > StackTimer + 0.1f)
         {
             StackTimer = Time.time;
@@ -51,27 +61,34 @@ public class Player : Character
         m_Rigidbody.velocity = Vector3.zero;
         m_Rigidbody.angularVelocity = Vector3.zero;
 
-
-        if(m_CharacterState == CharacterState.Moving)
+        if(m_CharacterState == eCharacterState.Moving)
         {
             m_Rigidbody.velocity = transform.forward * GameConfig.PlayerSettings.PlayerSpeed * Mathf.Clamp(m_InputManager.Drag.sqrMagnitude, 0, 1);
         }
     }
+    #endregion
 
+    #region Specific Methods
     private void startMoving()
     {
-        ChangeState(CharacterState.Moving);
-
-
+        ChangeState(eCharacterState.Moving);
     }
     private void stopMoving()
     {
-        ChangeState(CharacterState.Idle);
+        ChangeState(eCharacterState.Idle);
     }
 
+    private void exitPreviousCounter()
+    {
+        m_CurrentCounter.OnPlayerExit();
+        m_CurrentCounter = null;
+    }
+    #endregion
+
+    #region Physics
     private void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag(nameof(eTags.Counter)))
+        if (other.CompareTag(nameof(eTags.Interactable)))
         {
             if (m_CurrentCounter != null)
                 exitPreviousCounter();
@@ -82,51 +99,58 @@ public class Player : Character
     }
     private void OnTriggerExit(Collider other)
     {
-        if (other.CompareTag(nameof(eTags.Counter)))
+        if (other.CompareTag(nameof(eTags.Interactable)))
         {
             if (m_CurrentCounter != null)
                 exitPreviousCounter();
         }
     }
+    #endregion
 
-    private void exitPreviousCounter()
-    {
-        m_CurrentCounter.OnPlayerExit();
-        m_CurrentCounter = null;
-    }
-
+    #region Interaction Logic
     private void atCounter()
     {
-        if (m_CurrentCounter.GetComponent<CashCounter>())
+        switch (m_CurrentCounter.CounterType)
         {
-            if (m_CurrentCounter.GetComponent<CashCounter>().IsUnlocked())
-            {
+            case eCounterType.Production:
                 Pickup();
-            }
-            else
-            {
-                tryUnlock();
-            }
-
-        }
-        if (m_CurrentCounter.GetComponent<DisplayCounter>())
-        {
-            if (m_CurrentCounter.GetComponent<DisplayCounter>().IsUnlocked())
-            {
-                Drop();
-            }
-            else
-            {
-                tryUnlock();
-            }
-        }
-        if (m_CurrentCounter.GetComponent<ProductionCounter>())
-        {
-            Pickup();
-        }
-        if (m_CurrentCounter.GetComponent<AreaUnlock>())
-        {
-            tryUnlock();
+                break;
+            case eCounterType.Display:
+                if (m_CurrentCounter.m_DisplayCounter.IsUnlocked())
+                {
+                    Drop();
+                }
+                else
+                {
+                    tryUnlock();
+                }
+                break;
+            case eCounterType.Arcade:
+                if (m_CurrentCounter.m_ArcadeCounter.IsUnlocked())
+                {
+                    CollectCash();
+                }
+                else
+                {
+                    tryUnlock();
+                }
+                break;
+            case eCounterType.Cash:
+                if (m_CurrentCounter.m_CashCounter.IsUnlocked())
+                {
+                    CollectCash();
+                }
+                else
+                {
+                    tryUnlock();
+                }
+                break;
+            case eCounterType.Unlock:
+                if (!m_CurrentCounter.m_UnlockCounter.IsUnlocked())
+                {
+                    tryUnlock();
+                }
+                break;
         }
     }
 
@@ -142,7 +166,15 @@ public class Player : Character
     }
     private void Drop()
     {
-        TryDropItems(m_CurrentCounter.GetComponent<IItemStacker>());
+        TryDropItems(m_CurrentCounter.GetComponent<IItemStackable>());
+    }
+    private void CollectCash()
+    {
+        if (m_CurrentCounter.ItemOut(out var item))
+        {
+            item.OnItemIn(transform, 0);
+            this.DelayedAction(() => m_PoolManager.Enqueue(ePoolType.Cash, item.gameObject), 0.5f);
+        }
     }
 
     private void tryUnlock()
@@ -155,9 +187,10 @@ public class Player : Character
                 m_Wallet -= value;
                 m_StorageManager.SetWallet(m_Wallet);
 
-                Transform temp = m_PoolManager.Dequeue(PoolType.Cash, transform.position + Vector3.up, Quaternion.identity, m_CurrentCounter.transform).transform;
-                temp.DOLocalJump(Vector3.down, 2, 1, 0.5f).SetEase(Ease.OutCubic).OnComplete(() => m_PoolManager.Enqueue(PoolType.Cash, temp.gameObject));
+                Transform temp = m_PoolManager.Dequeue(ePoolType.Cash, transform.position + Vector3.up, Quaternion.identity, m_CurrentCounter.transform).transform;
+                temp.DOLocalJump(Vector3.down, 2, 1, 0.5f).SetEase(Ease.OutCubic).OnComplete(() => m_PoolManager.Enqueue(ePoolType.Cash, temp.gameObject));
             }
         }
     }
+    #endregion
 }

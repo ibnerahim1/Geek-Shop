@@ -11,7 +11,7 @@ namespace Game.Managers
     {
         public List<PoolableItem> PoolType;
 
-        public Dictionary<PoolType, Queue<GameObject>> m_Pool = new Dictionary<PoolType, Queue<GameObject>>();
+        public Dictionary<ePoolType, Queue<GameObject>> m_Pool = new Dictionary<ePoolType, Queue<GameObject>>();
         private GameObject m_Prefab;
         private GameObject d_Prefab;
 
@@ -25,7 +25,7 @@ namespace Game.Managers
             }
         }
 
-        public void CreatePool(PoolType i_PoolType, GameObject i_Prefab, int i_InitialSize)
+        public void CreatePool(ePoolType i_PoolType, GameObject i_Prefab, int i_InitialSize)
         {
             m_Pool[i_PoolType] = new Queue<GameObject>();
 
@@ -37,7 +37,7 @@ namespace Game.Managers
             }
         }
 
-        public GameObject Dequeue(PoolType i_PoolType, Vector3 i_Position = default, Quaternion i_Rotation = default, Transform i_Parent = default)
+        public GameObject Dequeue(ePoolType i_PoolType, Vector3 i_Position = default, Quaternion i_Rotation = default, Transform i_Parent = default)
         {
             if (!m_Pool.ContainsKey(i_PoolType))
             {
@@ -64,7 +64,7 @@ namespace Game.Managers
             return d_Prefab;
         }
 
-        public void Enqueue(PoolType i_PoolType, GameObject i_Prefab)
+        public void Enqueue(ePoolType i_PoolType, GameObject i_Prefab)
         {
             i_Prefab.gameObject.SetActive(false);
 
@@ -81,7 +81,7 @@ namespace Game.Managers
     [System.Serializable]
     public class PoolableItem
     {
-        public PoolType PoolType;
+        public ePoolType PoolType;
         public GameObject Prefab;
         public int InitialPoolSize = 10;
     }

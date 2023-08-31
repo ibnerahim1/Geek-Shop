@@ -7,27 +7,66 @@ using Game.Managers;
 using Game.Tools;
 
 [SelectionBase]
-public class Counter : MonoBehaviour, IItemStacker
+public class Counter : MonoBehaviour, IItemStackable
 {
-    public ItemType ItemType;
+    #region Public Properties
+        #region Interface Properties
+        eItemType IItemStackable.ItemType { get => ItemType; set => ItemType = value; }
+        int IItemStackable.Index { get => Index; set => Index = value; }
+        #endregion
+
+    public eItemType ItemType;
     public int Index;
-    ItemType IItemStacker.ItemType { get => ItemType; set => ItemType = value; }
-    int IItemStacker.Index { get => Index; set => Index = value; }
+    public eCounterType CounterType => m_CounterType;
+
+    public ProductionCounter m_ProductionCounter { get; internal set; }
+    public DisplayCounter m_DisplayCounter { get; internal set; }
+    public ArcadeCounter m_ArcadeCounter { get; internal set; }
+    public CashCounter m_CashCounter { get; internal set; }
+    public AreaUnlock m_UnlockCounter { get; internal set; }
+    #endregion
+
+
+    #region Private Properties
+    #region SetRefs
+    private Transform m_StackPoint;
+        private Image m_Outline;
+        [SerializeField] private eCounterType m_CounterType;
+        [SerializeField] private bool m_ExtensiveStacking;
+        #endregion
 
     protected StorageManager m_StorageManager => StorageManager.Instance;
     protected Stack<IItem> m_ItemStack = new Stack<IItem>();
-
-    #region SetRefs
-    private Transform m_StackPoint;
-    private Image m_Outline;
     #endregion
 
+    #region Init
     protected virtual void SetReferences()
     {
         m_StackPoint = transform.FindChildByName<Transform>("Stack Point");
         m_Outline = transform.FindChildByName<Image>("Outline");
-    }
 
+        switch (m_CounterType)
+        {
+            case eCounterType.Production:
+                m_ProductionCounter = GetComponent<ProductionCounter>();
+                break;
+            case eCounterType.Display:
+                m_DisplayCounter = GetComponent<DisplayCounter>();
+                break;
+            case eCounterType.Arcade:
+                m_ArcadeCounter = GetComponent<ArcadeCounter>();
+                break;
+            case eCounterType.Cash:
+                m_CashCounter = GetComponent<CashCounter>();
+                break;
+            case eCounterType.Unlock:
+                m_UnlockCounter = GetComponent<AreaUnlock>();
+                break;
+        }
+    }
+    #endregion
+
+    #region Specific
     public virtual void OnPlayerEnter()
     {
         m_Outline.transform.DOScale(Vector3.one * 1.2f, 0.2f).SetEase(Ease.OutCubic);
@@ -38,8 +77,9 @@ public class Counter : MonoBehaviour, IItemStacker
         m_Outline.transform.DOScale(Vector3.one, 0.2f).SetEase(Ease.Linear);
         m_Outline.DOFade(0.5f, 0.2f).SetEase(Ease.OutCubic);
     }
+    #endregion
 
-    #region IItemStacker
+    #region Interface Methods
     public void ItemIn(IItem item)
     {
         m_ItemStack.Push(item);
@@ -55,14 +95,13 @@ public class Counter : MonoBehaviour, IItemStacker
                 m_ItemStack.Push(result);
                 return false;
             }
+            if (m_ItemStack.Count < 1 && CounterType == eCounterType.Display)
+                ProductionCounter.Produce(ItemType, Index);
             item = result;
             return true;
         }
         else
-        {
-            ProductionCounter.Produce(ItemType, Index);
             return false;
-        }
     }
     #endregion
 }

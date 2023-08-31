@@ -9,32 +9,54 @@ using Game.Tools;
 
 public class AreaUnlock : Counter, IUnlockable
 {
+    #region Public Properties
     public GameObject[] DisableObjects, EnableObjects;
-
-    [Min(1), SerializeField] private int UnlockCost;
     public int PaidAmount { get; internal set; }
-    private int m_UnlockIndex;
-
-    #region SetRefs
-    private GameObject m_Canvas;
-    private TextMeshProUGUI m_CashText;
-    private Image m_Fill;
+    public bool IsUnlocked() { return !(UnlockCost > PaidAmount); }
     #endregion
 
-    public bool IsUnlocked() { return !(UnlockCost > PaidAmount); }
 
-    protected override void SetReferences()
-    {
-        m_Canvas = transform.FindChildByName<Transform>("Canvas").gameObject;
-        m_CashText = transform.FindChildByName<TextMeshProUGUI>("Cash Text");
-        m_Fill = transform.FindChildByName<Image>("Fill");
-    }
+    #region Private Properties
+        #region References Properties
+        private GameObject m_Canvas;
+        private TextMeshProUGUI m_CashText;
+        private Image m_Fill;
+        #endregion
 
+    [Min(1), SerializeField] private int UnlockCost;
+    private int m_UnlockIndex;
+    #endregion
+
+
+    #region Init
     private void OnValidate()
     {
         SetReferences();
     }
+    protected override void SetReferences()
+    {
+        base.SetReferences();
 
+        m_Canvas = transform.FindChildByName<Transform>("Canvas").gameObject;
+        m_CashText = transform.FindChildByName<TextMeshProUGUI>("Cash Text");
+        m_Fill = transform.FindChildByName<Image>("Fill");
+    }
+    #endregion
+
+    #region Specific Methods
+    public override void OnPlayerEnter()
+    {
+        base.OnPlayerEnter();
+        m_Canvas.transform.DOScale(Vector3.one * 1.5f, 0.2f).SetEase(Ease.OutCubic);
+    }
+    public override void OnPlayerExit()
+    {
+        base.OnPlayerExit();
+        m_Canvas.transform.DOScale(Vector3.one, 0.2f).SetEase(Ease.Linear);
+    }
+    #endregion
+
+    #region Interfaces Methods
     public void Initialize(int i_Index)
     {
         m_UnlockIndex = i_Index;
@@ -80,7 +102,7 @@ public class AreaUnlock : Counter, IUnlockable
 
     public void Unlock()
     {
-        this.DelayedAction(() => LevelManager.BuildNavMesh(), 0.2f);
+        LevelManager.Instance.BuildNavMesh();
         m_Canvas.SetActive(false);
 
         for (int i = 0; i < EnableObjects.Length; i++)
@@ -93,13 +115,5 @@ public class AreaUnlock : Counter, IUnlockable
         }
         Destroy(gameObject);
     }
-
-    public override void OnPlayerEnter()
-    {
-        m_Canvas.transform.DOScale(Vector3.one * 1.5f, 0.2f).SetEase(Ease.OutCubic);
-    }
-    public override void OnPlayerExit()
-    {
-        m_Canvas.transform.DOScale(Vector3.one, 0.2f).SetEase(Ease.Linear);
-    }
+    #endregion
 }

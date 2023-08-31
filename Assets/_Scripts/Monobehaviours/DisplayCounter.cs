@@ -9,23 +9,33 @@ using Game.Tools;
 
 public class DisplayCounter : Counter, IUnlockable
 {
-    public static List<DisplayCounter> Counters { get; internal set; } = new List<DisplayCounter>();
-
-    [Min(1), SerializeField] private int UnlockCost;
+    #region Public Properties
+    public bool IsUnlocked() { return !(UnlockCost > PaidAmount); }
     public int PaidAmount { get; internal set; }
-    
-    private Vector3 m_Extent;
-    private int m_UnlockIndex;
-
-    #region SetRefs
-    private GameObject m_Body;
-    private GameObject m_Canvas;
-    private TextMeshProUGUI m_CashText;
-    private Image m_Fill;
-    private BoxCollider m_BoxCollider;
+    [Min(0)] public int SellingPrice;
     #endregion
 
-    public bool IsUnlocked() { return !(UnlockCost > PaidAmount); }
+
+    #region Private Properties
+        #region References Properties
+        private GameObject m_Body;
+        private GameObject m_Canvas;
+        private TextMeshProUGUI m_CashText;
+        private Image m_Fill;
+        private BoxCollider m_BoxCollider;
+        private Vector3 m_Extent;
+        #endregion
+
+    [Min(1), SerializeField] private int UnlockCost;
+    private int m_UnlockIndex;
+    #endregion
+
+
+    #region Init
+    private void OnValidate()
+    {
+        SetReferences();
+    }
 
     protected override void SetReferences()
     {
@@ -39,16 +49,22 @@ public class DisplayCounter : Counter, IUnlockable
         m_Extent = m_BoxCollider.size;
     }
 
-    private void OnValidate()
-    {
-        SetReferences();
-    }
+    #endregion
 
-    private void Awake()
+    #region Specific Calls
+    public override void OnPlayerEnter()
     {
-        Counters = new List<DisplayCounter>();
+        base.OnPlayerEnter();
+        m_Canvas.transform.DOScale(Vector3.one * 1.5f, 0.2f).SetEase(Ease.OutCubic);
     }
+    public override void OnPlayerExit()
+    {
+        base.OnPlayerExit();
+        m_Canvas.transform.DOScale(Vector3.one, 0.2f).SetEase(Ease.Linear);
+    }
+    #endregion
 
+    #region Interfaces Methods
     public void Initialize(int i_Index)
     {
         m_UnlockIndex = i_Index;
@@ -63,7 +79,6 @@ public class DisplayCounter : Counter, IUnlockable
             m_BoxCollider.size = Vector3.one * 2.5f;
         }
     }
-
     public int TryToPay()
     {
         if (IsUnlocked())
@@ -85,8 +100,7 @@ public class DisplayCounter : Counter, IUnlockable
 
     public void Unlock()
     {
-        Counters.Add(this);
-        this.DelayedAction(()=> LevelManager.BuildNavMesh(), 0.2f);
+        LevelManager.Instance.AddCounters(this);
         ProductionCounter.Produce(ItemType, Index);
 
         m_BoxCollider.size = m_Extent;
@@ -94,17 +108,5 @@ public class DisplayCounter : Counter, IUnlockable
         m_Body.SetActive(true);
         m_Body.transform.DOScale(Vector3.one, 0.2f).SetEase(Ease.OutCubic).From(Vector3.zero);
     }
-
-    public override void OnPlayerEnter()
-    {
-        base.OnPlayerEnter();
-
-        m_Canvas.transform.DOScale(Vector3.one * 1.5f, 0.2f).SetEase(Ease.OutCubic);
-    }
-    public override void OnPlayerExit()
-    {
-        base.OnPlayerExit();
-
-        m_Canvas.transform.DOScale(Vector3.one, 0.2f).SetEase(Ease.Linear);
-    }
+    #endregion
 }

@@ -1,25 +1,36 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.Events;
+using UnityEngine.UI;
+using DG.Tweening;
+using Game.Interfaces;
 using Game.Managers;
 using Game.Tools;
 using Game.Data;
 
 public class ProductionCounter : Counter
 {
-    public static Dictionary<ItemType, ProductionCounter> Counters { get; internal set; } = new Dictionary<ItemType, ProductionCounter>();
+    #region Public Properties
+    public static Dictionary<eItemType, ProductionCounter> Counters { get; internal set; } = new Dictionary<eItemType, ProductionCounter>();
+    #endregion
 
-    private PoolManager m_PoolManager => PoolManager.Instance;
+
+    #region Private Properties
+        #region References Properties
+        private PoolManager m_PoolManager => PoolManager.Instance;
+        #endregion
 
     private List<int> m_ProductionCycles = new List<int>();
-
     private bool m_Producing;
+    #endregion
 
+
+    #region Init
     private void OnValidate()
     {
         SetReferences();
     }
+
     private void Start()
     {
         if (Counters.ContainsKey(ItemType))
@@ -27,8 +38,10 @@ public class ProductionCounter : Counter
         else
             Counters.Add(ItemType, this);
     }
+    #endregion
 
-    public static void Produce(ItemType i_Type, int i_Index)
+    #region Production Logic
+    public static void Produce(eItemType i_Type, int i_Index)
     {
         Counters[i_Type].Produce(i_Index);
     }
@@ -49,7 +62,7 @@ public class ProductionCounter : Counter
         {
             this.DelayedAction(() =>
             {
-                Item item = m_PoolManager.Dequeue(PoolType.Item, transform.position + new Vector3(-5, 1, 0), Quaternion.identity).GetComponent<Item>();
+                Item item = m_PoolManager.Dequeue(ePoolType.Item, transform.position + new Vector3(-5, 1, 0), Quaternion.identity).GetComponent<Item>();
                 ItemIn(item);
                 item.ItemType = ItemType;
                 item.Index = i_Index;
@@ -58,11 +71,14 @@ public class ProductionCounter : Counter
         }
         this.DelayedAction(() =>
         {
+            m_Producing = false;
             if (m_ProductionCycles.Contains(i_Index))
                 m_ProductionCycles.Remove(i_Index);
             if (m_ProductionCycles.Count > 0)
+            {
                 Produce(m_ProductionCycles[0]);
-            m_Producing = false;
+            }
         }, GameConfig.CounterSettings.ProductionSpeed * GameConfig.CounterSettings.ProductionQTY);
     }
+    #endregion
 }

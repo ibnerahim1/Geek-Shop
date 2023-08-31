@@ -9,30 +9,37 @@ using Game.Tools;
 
 public class CashCounter : Counter, IUnlockable
 {
-    public static List<CashCounter> Counters { get; internal set; } = new List<CashCounter>();
+    #region Public Properties
 
-    [Min(1), SerializeField] private int UnlockCost;
     public int PaidAmount { get; internal set; }
     public int CashCollected { get; internal set; }
     public int CashiersNearby { get; internal set; }
 
-    public delegate void CounterUnlocked(CashCounter cashCounter);
-    public static CounterUnlocked OnCashCounterUnlocked;
-
-    private Vector3 m_Extent;
-    private int m_UnlockIndex;
+    public bool IsUnlocked() { return !(UnlockCost > PaidAmount); }
     public List<Customer> m_Customers { get; internal set; } = new List<Customer>();
-
-    #region SetRefs
-    private GameObject m_Body;
-    private GameObject m_Canvas;
-    private TextMeshProUGUI m_CashText;
-    private Image m_Fill;
-    private BoxCollider m_BoxCollider;
     #endregion
 
-    public bool IsUnlocked() { return !(UnlockCost > PaidAmount); }
 
+    #region Private Properties
+        #region References Properties
+        private GameObject m_Body;
+        private GameObject m_Canvas;
+        private TextMeshProUGUI m_CashText;
+        private Image m_Fill;
+        private BoxCollider m_BoxCollider;
+        private Vector3 m_Extent;
+        #endregion
+
+    [Min(1), SerializeField] private int UnlockCost;
+    private int m_UnlockIndex;
+    #endregion
+
+
+    #region Init
+    private void OnValidate()
+    {
+        SetReferences();
+    }
     protected override void SetReferences()
     {
         base.SetReferences();
@@ -44,12 +51,34 @@ public class CashCounter : Counter, IUnlockable
         m_BoxCollider = GetComponent<BoxCollider>();
         m_Extent = m_BoxCollider.size;
     }
+    #endregion
 
-    private void OnValidate()
+    #region Specific Calls
+    public override void OnPlayerEnter()
     {
-        SetReferences();
-    }
+        base.OnPlayerEnter();
 
+        m_Canvas.transform.DOScale(Vector3.one * 1.5f, 0.2f).SetEase(Ease.OutCubic);
+        CashiersNearby++;
+    }
+    public override void OnPlayerExit()
+    {
+        base.OnPlayerExit();
+
+        m_Canvas.transform.DOScale(Vector3.one, 0.2f).SetEase(Ease.Linear);
+        CashiersNearby--;
+    }
+    public void OnBotEnter()
+    {
+        CashiersNearby++;
+    }
+    public void OnBotExit()
+    {
+        CashiersNearby--;
+    }
+    #endregion
+
+    #region Interfaces Methods
     public void Initialize(int i_Index)
     {
         m_UnlockIndex = i_Index;
@@ -83,50 +112,23 @@ public class CashCounter : Counter, IUnlockable
         }
         return value;
     }
-    public void PayBill(int cash, IItem item)
-    {
-        CashCollected += cash;
-        ItemIn(item);
-    }
 
     public void Unlock()
     {
-        Counters.Add(this);
-        LevelManager.BuildNavMesh();
+        LevelManager.Instance.AddCounters(this);
 
         m_BoxCollider.size = m_Extent;
         m_Canvas.SetActive(false);
         m_Body.SetActive(true);
         m_Body.transform.DOScale(Vector3.one, 0.2f).SetEase(Ease.OutCubic).From(Vector3.zero);
     }
+    #endregion
 
-    public override void OnPlayerEnter()
+    #region Customer Interaction Logic
+    public void PayBill(int cash, IItem item)
     {
-        base.OnPlayerEnter();
-
-        m_Canvas.transform.DOScale(Vector3.one * 1.5f, 0.2f).SetEase(Ease.OutCubic);
-        CashiersNearby++;
-    }
-    public override void OnPlayerExit()
-    {
-        base.OnPlayerExit();
-
-        m_Canvas.transform.DOScale(Vector3.one, 0.2f).SetEase(Ease.Linear);
-        CashiersNearby--;
-    }
-    public void OnBotEnter()
-    {
-        base.OnPlayerEnter();
-
-        m_Canvas.transform.DOScale(Vector3.one * 1.5f, 0.2f).SetEase(Ease.OutCubic);
-        CashiersNearby++;
-    }
-    public void OnBotExit()
-    {
-        base.OnPlayerExit();
-
-        m_Canvas.transform.DOScale(Vector3.one, 0.2f).SetEase(Ease.Linear);
-        CashiersNearby--;
+        CashCollected += cash;
+        ItemIn(item);
     }
     public Vector3 GetPosition(Customer customer)
     {
@@ -142,10 +144,14 @@ public class CashCounter : Counter, IUnlockable
     }
     public void RemoveCustomer(Customer customer)
     {
-        m_Customers.Remove(customer);
-        for (int i = 0; i < m_Customers.Count; i++)
+        this.DelayedAction(() =>
         {
-            m_Customers[i].calulateTarget();
-        }
+            m_Customers.Remove(customer);
+            for (int i = 0; i < m_Customers.Count; i++)
+            {
+                m_Customers[i].calulateTarget();
+            }
+        }, 1);
     }
+    #endregion
 }

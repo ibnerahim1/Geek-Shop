@@ -6,14 +6,8 @@ using DG.Tweening;
 namespace Game.Managers
 {
 
-
     public class GameManager : Singleton<GameManager>
     {
-        protected override void Awake()
-        {
-            base.Awake();
-        }
-
         private void Update()
         {
 #if UNITY_EDITOR

@@ -1,10 +1,10 @@
 
-public enum CharacterState
+public enum eCharacterState
 {
     Idle,
     Moving
 }
-public enum CustomerState
+public enum eCustomerState
 {
     Shopping,
     WaitingForBilling,
@@ -12,14 +12,14 @@ public enum CustomerState
     DoneBilling
 }
 
-public enum PoolType
+public enum ePoolType
 {
     Customer,
     Cash,
     Item
 }
 
-public enum SFXType
+public enum eSFXType
 {
     Tap,
     Stack,
@@ -28,17 +28,25 @@ public enum SFXType
     Upgrade
 }
 
-public enum ItemType
+public enum eItemType
 {
     Comics,
     Merchs,
     Clothes,
-    TCG,
-    None
+    Idle
 }
 
 public enum eTags
 {
-    Counter,
-    UnlockArea
+    Interactable
+}
+
+public enum eCounterType
+{
+    Production,
+    Display,
+    Arcade,
+    Cash,
+    Unlock,
+    Statue
 }

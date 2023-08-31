@@ -42,7 +42,7 @@ public static class Helpers
         return result;
     }
 
-    public static bool DoesCounterMatchItem(IItemStacker counter, IItem item)
+    public static bool DoesCounterMatchItem(IItemStackable counter, IItem item)
     {
         return (counter.ItemType == item.ItemType && counter.Index == item.Index);
     }

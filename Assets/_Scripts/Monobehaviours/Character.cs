@@ -4,26 +4,37 @@ using Game.Interfaces;
 using Game.Tools;
 
 [SelectionBase]
-public class Character : MonoBehaviour, IItemStacker
+public class Character : MonoBehaviour, IItemStackable
 {
-    protected static int m_MoveID = Animator.StringToHash("Move");
+    #region Public Properties
+        #region Interface Properties
+        eItemType IItemStackable.ItemType { get => ItemType; set => ItemType = value; }
+        int IItemStackable.Index { get => Index; set => Index = value; }
+        #endregion
 
-    public ItemType ItemType;
+    public eItemType ItemType;
     public int Index;
-    ItemType IItemStacker.ItemType { get => ItemType; set => ItemType = value; }
-    int IItemStacker.Index { get => Index; set => Index = value; }
+    #endregion
+
+    #region Private Properties
+        #region References
+        protected Rigidbody m_Rigidbody;
+        protected Animator m_Animator;
+        protected Transform m_StackPoint;
+        #endregion
 
     [SerializeField] protected float StackTimer;
-    protected CharacterState m_CharacterState;
-
-    protected Rigidbody m_Rigidbody;
-    protected Animator m_Animator;
-
-
-    protected Transform m_StackPoint;
-    protected Stack<IItem> m_ItemStack = new Stack<IItem>();
+    protected eCharacterState m_CharacterState;
     protected Counter m_CurrentCounter;
+    protected Stack<IItem> m_ItemStack = new Stack<IItem>();
+    protected static int m_MoveID = Animator.StringToHash("Move");
+    #endregion
 
+    #region Init
+    protected virtual void OnValidate()
+    {
+        SetReferences();
+    }
     protected virtual void SetReferences()
     {
         m_Rigidbody = GetComponent<Rigidbody>();
@@ -31,22 +42,21 @@ public class Character : MonoBehaviour, IItemStacker
         m_StackPoint = transform.FindChildByName<Transform>("Stack Point");
     }
 
-    protected virtual void OnValidate()
-    {
-        SetReferences();
-    }
-
     protected virtual void Start()
     {
-        m_CharacterState = CharacterState.Idle;
+        m_CharacterState = eCharacterState.Idle;
     }
+    #endregion
 
+    #region Update
     protected virtual void Update()
     {
         m_Animator.SetFloat(m_MoveID, m_Rigidbody.velocity.magnitude);
     }
+    #endregion
 
-    protected virtual void ChangeState(CharacterState i_NewState)
+    #region Specific Methods
+    protected virtual void ChangeState(eCharacterState i_NewState)
     {
         m_CharacterState = i_NewState;
     }
@@ -55,9 +65,7 @@ public class Character : MonoBehaviour, IItemStacker
     {
         m_Animator.SetLayerWeight(1, m_ItemStack.Count > 0 ? 1 : 0);
     }
-
-
-    public void TryDropItems(IItemStacker i_ItemStacker)
+    public void TryDropItems(IItemStackable i_ItemStacker)
     {
         if (m_ItemStack.TryPeek(out IItem result))
         {
@@ -68,8 +76,9 @@ public class Character : MonoBehaviour, IItemStacker
             }
         }
     }
+    #endregion
 
-    #region IItemStacker
+    #region Interface Methods
     public void ItemIn(IItem item)
     {
         IsCarrying();

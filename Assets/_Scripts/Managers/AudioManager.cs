@@ -26,23 +26,23 @@ namespace Game.Managers
             SFXSource.volume = m_GameData.SFXVolume * m_GameData.MasterVolume;
         }
 
-        public void SpawnSFX(SFXType type)
+        public void SpawnSFX(eSFXType type)
         {
             switch (type)
             {
-                case SFXType.Tap:
+                case eSFXType.Tap:
 
                     break;
-                case SFXType.Stack:
+                case eSFXType.Stack:
 
                     break;
-                case SFXType.Unstack:
+                case eSFXType.Unstack:
 
                     break;
-                case SFXType.Money:
+                case eSFXType.Money:
 
                     break;
-                case SFXType.Upgrade:
+                case eSFXType.Upgrade:
 
                     break;
             }
