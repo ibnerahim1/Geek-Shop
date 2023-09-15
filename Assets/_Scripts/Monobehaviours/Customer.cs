@@ -54,7 +54,8 @@ public class Customer : Character, IPoolable
             }
             else if (m_CharacterState == eCharacterState.Moving && m_NavMeshAgent.path.corners.Length > 1)
             {
-                transform.DOLookAt(new Vector3(m_NavMeshAgent.path.corners[1].x, transform.position.y, m_NavMeshAgent.path.corners[1].z), 0.1f).SetEase(Ease.Linear);
+                transform.LookAt( new Vector3(m_NavMeshAgent.path.corners[1].x, transform.position.y, m_NavMeshAgent.path.corners[1].z));
+                //transform.LookAt(Vector3.Lerp( transform.position + transform.forward, new Vector3(m_NavMeshAgent.path.corners[1].x, transform.position.y, m_NavMeshAgent.path.corners[1].z), Time.deltaTime));
             }
         }
         if (m_NavMeshAgent.path.corners.Length > 1)

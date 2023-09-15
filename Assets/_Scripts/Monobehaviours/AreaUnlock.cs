@@ -46,12 +46,10 @@ public class AreaUnlock : Counter, IUnlockable
     #region Specific Methods
     public override void OnPlayerEnter()
     {
-        base.OnPlayerEnter();
         m_Canvas.transform.DOScale(Vector3.one * 1.5f, 0.2f).SetEase(Ease.OutCubic);
     }
     public override void OnPlayerExit()
     {
-        base.OnPlayerExit();
         m_Canvas.transform.DOScale(Vector3.one, 0.2f).SetEase(Ease.Linear);
     }
     #endregion
@@ -113,7 +111,7 @@ public class AreaUnlock : Counter, IUnlockable
         {
             DisableObjects[i].SetActive(false);
         }
-        Destroy(gameObject);
+        gameObject.SetActive(false);
     }
     #endregion
 }

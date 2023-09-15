@@ -28,8 +28,8 @@ public class Counter : MonoBehaviour, IItemStackable
 
 
     #region Private Properties
-    #region SetRefs
     private Transform m_StackPoint;
+        #region SetRefs
         private Image m_Outline;
         [SerializeField] private eCounterType m_CounterType;
         [SerializeField] private bool m_ExtensiveStacking;

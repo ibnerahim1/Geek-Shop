@@ -81,9 +81,9 @@ public class Character : MonoBehaviour, IItemStackable
     #region Interface Methods
     public void ItemIn(IItem item)
     {
-        IsCarrying();
         m_ItemStack.Push(item);
         item.OnItemIn(m_StackPoint, m_ItemStack.Count - 1);
+        IsCarrying();
     }
 
     public bool ItemOut(out IItem i_Item)

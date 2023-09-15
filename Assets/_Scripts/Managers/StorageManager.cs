@@ -100,14 +100,14 @@ namespace Game.Managers
                 return m_GameData;
             }
         }
-#if UNITY_EDITOR
 
+#if UNITY_EDITOR
         [MenuItem("Abdul Rab/DeleteData")]
+#endif
         public static void DeleteData()
         {
             File.Delete(Path.Combine(Application.persistentDataPath, $"{typeof(GameData)}.json"));
         }
-#endif
 
         #region Settings Setter
 
