@@ -5,8 +5,8 @@ namespace Game.Data
     {
         public static class PlayerSettings
         {
-            public static float PlayerSpeed = 12f;
-            public static int[] StackLimit = { 12, 8, 10, 12, 14 };
+            public static float PlayerSpeed = 8f;
+            public static int[] StackLimit = { 9, 8, 10, 12, 14 };
             public static float StackSpeed = 0.01f;
         }
 
@@ -19,7 +19,7 @@ namespace Game.Data
         public static class CustomerSettings
         {
             public static float CustomerSpeed = 5f;
-            public static int CustomersPerCounter = 5;
+            public static int CustomersPerCounter = 3;
             public static float IdleTime = 5f;
         }
 

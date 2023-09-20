@@ -17,12 +17,12 @@ namespace Game.Managers
         public List<DisplayCounter> DisplayCounters { get; } = new List<DisplayCounter>();
         public List<ArcadeCounter> ArcadeCounters { get; } = new List<ArcadeCounter>();
         public List<CashCounter> CashCounters { get; internal set; } = new List<CashCounter>();
+        //public NavMeshSurface m_NavMeshSurface;
         #endregion
 
 
         #region Private Properties
         private PoolManager m_Pool => PoolManager.Instance;
-        private NavMeshSurface m_NavMeshSurface;
         #endregion
 
 
@@ -30,7 +30,6 @@ namespace Game.Managers
         void Start()
         {
             InvokeRepeating(nameof(spawnCustomers), 2, 2);
-            m_NavMeshSurface = FindObjectOfType<NavMeshSurface>();
         }
 
         #endregion
@@ -39,30 +38,30 @@ namespace Game.Managers
         public void AddCounters(DisplayCounter counter)
         {
             DisplayCounters.Add(counter);
-            BuildNavMesh();
+            //BuildNavMesh();
         }
         public void AddCounters(ArcadeCounter counter)
         {
             ArcadeCounters.Add(counter);
-            BuildNavMesh();
+            //BuildNavMesh();
         }
         public void AddCounters(CashCounter counter)
         {
             CashCounters.Add(counter);
-            BuildNavMesh();
+            //BuildNavMesh();
         }
 
-        public void BuildNavMesh()
-        {
-            this.DelayedAction(() =>
-            {
-                m_NavMeshSurface.BuildNavMesh();
-                for (int i = 0; i < Customers.Count; i++)
-                {
-                    Customers[i].calulateTarget();
-                }
-            }, 0.21f);
-        }
+        //public void BuildNavMesh()
+        //{
+        //    this.DelayedAction(() =>
+        //    {
+        //        m_NavMeshSurface.BuildNavMesh();
+        //        for (int i = 0; i < Customers.Count; i++)
+        //        {
+        //            Customers[i].calulateTarget();
+        //        }
+        //    }, 0.21f);
+        //}
         #endregion
 
         #region Get Methods

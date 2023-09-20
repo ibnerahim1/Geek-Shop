@@ -17,7 +17,10 @@ public class Customer : Character, IPoolable
         #region References
         private LevelManager m_LevelManager => LevelManager.Instance;
         private PoolManager m_PoolManager => PoolManager.Instance;
-        private NavMeshAgent m_NavMeshAgent;
+
+    public GameObject AngryEmoji;
+
+    private NavMeshAgent m_NavMeshAgent;
         #endregion
 
     private eCustomerState m_CustomerState;
@@ -138,6 +141,7 @@ public class Customer : Character, IPoolable
     }
     public void SetDestination(Vector3 i_Position)
     {
+        CancelInvoke("Frustrate");
         m_Destination = i_Position;
         m_NavMeshAgent.SetDestination(m_Destination);
         startMoving();
@@ -145,6 +149,7 @@ public class Customer : Character, IPoolable
 
     private void arrivedAtDestination()
     {
+        Invoke("Frustrate", Random.Range(5f, 10f));
         switch (m_CustomerState)
         {
             case eCustomerState.Shopping:
@@ -174,6 +179,30 @@ public class Customer : Character, IPoolable
                     m_LevelManager.HasExit(this);
                 break;
         }
+    }
+
+    private void Frustrate()
+    {
+        if (!gameObject.activeSelf)
+            return;
+
+        IItem[] items = m_ItemStack.ToArray();
+        m_ItemStack.Clear();
+        IsCarrying();
+        Destroy(Instantiate(AngryEmoji, transform.position + Vector3.up * 4, Quaternion.identity, transform), 5);
+        for (int i = 0; i < items.Length; i++)
+        {
+            items[i].OnItemOut();
+        }
+        if(m_CustomerState == eCustomerState.WaitingForBilling)
+        {
+
+            m_CurrentCounter.m_CashCounter.RemoveCustomer(this);
+        }
+        SwitchCustomerState(eCustomerState.DoneBilling);
+        m_Rigidbody.isKinematic = false;
+        exitPreviousCounter();
+        SetDestination(spawnPosition);
     }
 
     private void startMoving()
@@ -260,6 +289,8 @@ public class Customer : Character, IPoolable
         }
         if (m_CurrentCounter.ItemOut(out var item))
         {
+            CancelInvoke("Frustrate");
+            Invoke("Frustrate", Random.Range(5f, 10f));
             ItemIn(item);
             ServiceQty--;
         }
@@ -275,6 +306,8 @@ public class Customer : Character, IPoolable
         {
             if (m_PaidBill < m_TotalBill)
             {
+                CancelInvoke("Frustrate");
+                Invoke("Frustrate", Random.Range(5f, 10f));
                 int value = Mathf.Min((int)(m_TotalBill / 20) + 1, m_TotalBill - m_PaidBill);
                 m_PaidBill += value;
                 m_CurrentCounter.m_CashCounter.PayBill(value, m_PoolManager.Dequeue(ePoolType.Cash, transform.position + Vector3.up, Quaternion.identity, m_CurrentCounter.transform).GetComponent<IItem>());

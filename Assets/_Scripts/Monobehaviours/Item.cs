@@ -30,7 +30,12 @@ public class Item : MonoBehaviour, IItem, IPoolable
 
     public void OnItemOut()
     {
-
+        GameObject temp = transform.GetChild((int)ItemType).GetChild(Index).gameObject;
+        Rigidbody rb = temp.AddComponent<Rigidbody>();
+        MeshCollider mc = temp.AddComponent<MeshCollider>();
+        mc.convex = true;
+        rb.AddExplosionForce(Random.Range(200, 300), new Vector3(transform.position.x + Random.Range(-1, 1), 0, transform.position.z + Random.Range(-1, 1)), 200);
+        transform.parent = null;
     }
 
     public void OnObjectSpawn()

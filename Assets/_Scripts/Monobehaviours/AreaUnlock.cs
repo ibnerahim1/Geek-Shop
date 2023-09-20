@@ -100,7 +100,7 @@ public class AreaUnlock : Counter, IUnlockable
 
     public void Unlock()
     {
-        LevelManager.Instance.BuildNavMesh();
+        //LevelManager.Instance.BuildNavMesh();
         m_Canvas.SetActive(false);
 
         for (int i = 0; i < EnableObjects.Length; i++)
