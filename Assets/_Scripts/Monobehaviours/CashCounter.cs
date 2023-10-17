@@ -36,11 +36,11 @@ public class CashCounter : Counter, IUnlockable
 
 
     #region Init
-    private void OnValidate()
+    public override void OnValidate()
     {
         SetReferences();
     }
-    protected override void SetReferences()
+    public override void SetReferences()
     {
         base.SetReferences();
 

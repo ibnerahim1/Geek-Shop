@@ -26,7 +26,7 @@ namespace Game.Tools
             }
         }
 
-        protected virtual void Awake()
+        public virtual void Awake()
         {
             if (instance != null && instance != this)
             {

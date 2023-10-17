@@ -36,7 +36,7 @@ public class ArcadeCounter : Counter, IUnlockable
         SetReferences();
     }
 
-    protected override void SetReferences()
+    public override void SetReferences()
     {
         base.SetReferences();
 

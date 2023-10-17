@@ -34,7 +34,7 @@ public class Customer : Character, IPoolable
     #endregion
 
     #region Init
-    protected override void Start()
+    public override void Start()
     {
         base.Start();
 
@@ -45,7 +45,7 @@ public class Customer : Character, IPoolable
     #endregion
 
     #region Update
-    protected override void Update()
+    public override void Update()
     {
         base.Update();
 

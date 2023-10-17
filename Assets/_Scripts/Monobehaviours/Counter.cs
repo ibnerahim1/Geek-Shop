@@ -30,17 +30,17 @@ public class Counter : MonoBehaviour, IItemStackable
     #region Private Properties
     private Transform m_StackPoint;
         #region SetRefs
-        private Image m_Outline;
+        public Image m_Outline;
         [SerializeField] private eCounterType m_CounterType;
         [SerializeField] private bool m_ExtensiveStacking;
-        #endregion
+    #endregion
 
-    protected StorageManager m_StorageManager => StorageManager.Instance;
-    protected Stack<IItem> m_ItemStack = new Stack<IItem>();
+    public StorageManager m_StorageManager => StorageManager.Instance;
+    public Stack<IItem> m_ItemStack = new Stack<IItem>();
     #endregion
 
     #region Init
-    protected virtual void SetReferences()
+    public virtual void SetReferences()
     {
         m_StackPoint = transform.FindChildByName<Transform>("Stack Point");
         m_Outline = transform.FindChildByName<Image>("Outline");
@@ -65,6 +65,10 @@ public class Counter : MonoBehaviour, IItemStackable
         }
     }
     #endregion
+    public virtual void OnValidate()
+    {
+        SetReferences();
+    }
 
     #region Specific
     public virtual void OnPlayerEnter()

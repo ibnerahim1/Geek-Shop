@@ -15,7 +15,7 @@ namespace Game.Managers
         private GameObject m_Prefab;
         private GameObject d_Prefab;
 
-        protected override void Awake()
+        public override void Awake()
         {
             base.Awake();
 

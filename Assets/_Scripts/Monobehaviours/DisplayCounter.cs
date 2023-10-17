@@ -37,7 +37,7 @@ public class DisplayCounter : Counter, IUnlockable
         SetReferences();
     }
 
-    protected override void SetReferences()
+    public override void SetReferences()
     {
         base.SetReferences();
 

@@ -21,7 +21,7 @@ public class Player : Character
     #endregion
 
     #region Init
-    protected override void Start()
+    public override void Start()
     {
         base.Start();
         m_Wallet = m_StorageManager.GameData.PlayerWallet;
@@ -40,13 +40,13 @@ public class Player : Character
     #endregion
 
     #region Updates
-    protected override void Update()
+    public override void Update()
     {
         base.Update();
 
-        if (m_CharacterState == eCharacterState.Moving && m_InputManager.Drag.sqrMagnitude > 0.01f)
+        if (m_CharacterState == eCharacterState.Moving)
         {
-            transform.DOLookAt(transform.position + Helpers.MainCamera.transform.right * m_InputManager.Drag.x + new Vector3(Helpers.MainCamera.transform.forward.x, 0, Helpers.MainCamera.transform.forward.z) * m_InputManager.Drag.y, 0.1f).SetEase(Ease.Linear);
+            transform.DOLookAt(transform.position + Camera.main.transform.right * m_InputManager.Drag.x + new Vector3(Camera.main.transform.forward.x, 0, Camera.main.transform.forward.z) * m_InputManager.Drag.y, 0.1f).SetEase(Ease.Linear);
         }
         if(m_CurrentCounter != null && Time.time > StackTimer + 0.1f)
         {
@@ -85,13 +85,15 @@ public class Player : Character
     }
     #endregion
 
+
+    public delegate void trigger(Counter temp);
+    public static event trigger onTrigger;
     #region Physics
     private void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag(nameof(eTags.Interactable)))
         {
-            if (m_CurrentCounter != null)
-                exitPreviousCounter();
+            onTrigger?.Invoke(other.GetComponent<Counter>());
             m_CurrentCounter = other.GetComponent<Counter>();
             m_CurrentCounter.OnPlayerEnter();
             StackTimer = 0;

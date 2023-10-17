@@ -2,12 +2,29 @@ using Game.Tools;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using DG.Tweening;
+using TMPro;
 
 namespace Game.Managers
 {
 
     public class GameManager : Singleton<GameManager>
     {
+        public TextMeshProUGUI log;
+
+        private void OnEnable()
+        {
+            Player.onTrigger += Triggered;
+        }
+        private void OnDisable()
+        {
+            Player.onTrigger -= Triggered;
+        }
+
+        public void Triggered(Counter tra)
+        {
+            log.text = $"{tra.name} enabled: {tra.enabled}";
+        }
+
         private void Update()
         {
 #if UNITY_EDITOR
@@ -26,7 +43,6 @@ namespace Game.Managers
 
         private void reloadLevel()
         {
-            DOTween.KillAll();
             SceneManager.LoadScene(0);
         }
     }

@@ -18,7 +18,7 @@ namespace Game.Managers
 
         public static event DataUpdated OnGameDataUpdated;
 
-        protected override void Awake()
+        public override void Awake()
         {
             base.Awake();
 

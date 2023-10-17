@@ -18,50 +18,50 @@ public class Character : MonoBehaviour, IItemStackable
 
     #region Private Properties
         #region References
-        protected Rigidbody m_Rigidbody;
-        protected Animator m_Animator;
-        protected Transform m_StackPoint;
+        public Rigidbody m_Rigidbody;
+        public Animator m_Animator;
+        public Transform m_StackPoint;
         #endregion
 
-    [SerializeField] protected float StackTimer;
-    protected eCharacterState m_CharacterState;
-    protected Counter m_CurrentCounter;
-    protected Stack<IItem> m_ItemStack = new Stack<IItem>();
-    protected static int m_MoveID = Animator.StringToHash("Move");
+    [SerializeField] public float StackTimer;
+    public eCharacterState m_CharacterState;
+    public Counter m_CurrentCounter;
+    public Stack<IItem> m_ItemStack = new Stack<IItem>();
+    public static int m_MoveID = Animator.StringToHash("Move");
     #endregion
 
     #region Init
-    protected virtual void OnValidate()
+    public virtual void OnValidate()
     {
         SetReferences();
     }
-    protected virtual void SetReferences()
+    public virtual void SetReferences()
     {
         m_Rigidbody = GetComponent<Rigidbody>();
         m_Animator = transform.FindChildByName<Animator>("Body");
         m_StackPoint = transform.FindChildByName<Transform>("Stack Point");
     }
 
-    protected virtual void Start()
+    public virtual void Start()
     {
         m_CharacterState = eCharacterState.Idle;
     }
     #endregion
 
     #region Update
-    protected virtual void Update()
+    public virtual void Update()
     {
         m_Animator.SetFloat(m_MoveID, m_Rigidbody.velocity.magnitude);
     }
     #endregion
 
     #region Specific Methods
-    protected virtual void ChangeState(eCharacterState i_NewState)
+    public virtual void ChangeState(eCharacterState i_NewState)
     {
         m_CharacterState = i_NewState;
     }
 
-    protected virtual void IsCarrying()
+    public virtual void IsCarrying()
     {
         m_Animator.SetLayerWeight(1, m_ItemStack.Count > 0 ? 1 : 0);
     }
