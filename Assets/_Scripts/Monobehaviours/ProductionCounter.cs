@@ -26,13 +26,13 @@ public class ProductionCounter : Counter
 
 
     #region Init
-    private void OnValidate()
+    private void Awake()
     {
         SetReferences();
     }
-
     private void Start()
     {
+
         if (Counters.ContainsKey(ItemType))
             Counters[ItemType] = this;
         else

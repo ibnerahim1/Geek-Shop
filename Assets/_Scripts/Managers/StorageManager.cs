@@ -52,10 +52,13 @@ namespace Game.Managers
                 return;
             }
 
-            for (int i = 0; i < unlockables.Count; i++)
+            this.SkipFrame(() =>
             {
-                unlockables[i].Initialize(i);
-            }
+                for (int i = 0; i < unlockables.Count; i++)
+                {
+                    unlockables[i].Initialize(i);
+                }
+            });
         }
 
         private void OnEnable()

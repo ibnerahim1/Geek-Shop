@@ -58,12 +58,12 @@ public class Player : Character
 
     private void FixedUpdate()
     {
-        m_Rigidbody.velocity = Vector3.zero;
+        m_Rigidbody.velocity = Vector3.down * 3;
         m_Rigidbody.angularVelocity = Vector3.zero;
 
         if(m_CharacterState == eCharacterState.Moving)
         {
-            m_Rigidbody.velocity = transform.forward * GameConfig.PlayerSettings.PlayerSpeed * Mathf.Clamp(m_InputManager.Drag.sqrMagnitude, 0, 1);
+            m_Rigidbody.velocity = Vector3.down * 3 + transform.forward * GameConfig.PlayerSettings.PlayerSpeed * Mathf.Clamp(m_InputManager.Drag.sqrMagnitude, 0, 1);
         }
     }
     #endregion

@@ -36,7 +36,7 @@ public class CashCounter : Counter, IUnlockable
 
 
     #region Init
-    public override void OnValidate()
+    private void Awake()
     {
         SetReferences();
     }

@@ -28,11 +28,11 @@ public class Counter : MonoBehaviour, IItemStackable
 
 
     #region Private Properties
-    private Transform m_StackPoint;
+    public Transform m_StackPoint;
         #region SetRefs
         public Image m_Outline;
-        [SerializeField] private eCounterType m_CounterType;
-        [SerializeField] private bool m_ExtensiveStacking;
+        [SerializeField] public eCounterType m_CounterType;
+        [SerializeField] public bool m_ExtensiveStacking;
     #endregion
 
     public StorageManager m_StorageManager => StorageManager.Instance;
@@ -65,7 +65,7 @@ public class Counter : MonoBehaviour, IItemStackable
         }
     }
     #endregion
-    public virtual void OnValidate()
+    private void Awake()
     {
         SetReferences();
     }

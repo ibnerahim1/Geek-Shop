@@ -117,5 +117,14 @@ namespace Game.Tools
             yield return new WaitForSecondsRealtime(delay);
             action.Invoke();
         }
+        public static void SkipFrame(this MonoBehaviour mono, UnityAction action)
+        {
+            mono.StartCoroutine(DoAction(action));
+        }
+        private static IEnumerator DoAction(UnityAction action)
+        {
+            yield return new WaitForEndOfFrame();
+            action.Invoke();
+        }
     }
 }

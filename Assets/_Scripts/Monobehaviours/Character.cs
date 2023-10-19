@@ -31,10 +31,12 @@ public class Character : MonoBehaviour, IItemStackable
     #endregion
 
     #region Init
-    public virtual void OnValidate()
+
+    private void Awake()
     {
         SetReferences();
     }
+
     public virtual void SetReferences()
     {
         m_Rigidbody = GetComponent<Rigidbody>();

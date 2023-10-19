@@ -32,7 +32,7 @@ public class DisplayCounter : Counter, IUnlockable
 
 
     #region Init
-    private void OnValidate()
+    private void Awake()
     {
         SetReferences();
     }
@@ -72,7 +72,7 @@ public class DisplayCounter : Counter, IUnlockable
 
         if (IsUnlocked())
             Invoke("Unlock", 0.1f);
-        else
+        else 
         {
             m_CashText.text = (UnlockCost - PaidAmount).ToString();
             m_Fill.fillAmount = PaidAmount / (float)UnlockCost;

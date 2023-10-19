@@ -31,7 +31,7 @@ public class ArcadeCounter : Counter, IUnlockable
 
 
     #region Init
-    private void OnValidate()
+    private void Awake()
     {
         SetReferences();
     }
