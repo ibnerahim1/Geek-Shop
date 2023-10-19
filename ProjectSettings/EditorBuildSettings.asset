@@ -5,9 +5,9 @@ EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
-  - enabled: 0
+  - enabled: 1
     path: Assets/Moonee/MoonSDK/Scenes/MoonSDKScene.unity
-    guid: aca3836111c874f3598497d53819cc6d
+    guid: 2ae942c3fa64142fea94b3a3882ef001
   - enabled: 1
     path: Assets/Scenes/main.unity
     guid: 9fc0d4010bbf28b4594072e72b8655ab

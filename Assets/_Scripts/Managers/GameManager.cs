@@ -3,26 +3,17 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using DG.Tweening;
 using TMPro;
+using GameAnalyticsSDK;
 
 namespace Game.Managers
 {
 
     public class GameManager : Singleton<GameManager>
     {
-        public TextMeshProUGUI log;
-
-        private void OnEnable()
+        private void Start()
         {
-            Player.onTrigger += Triggered;
-        }
-        private void OnDisable()
-        {
-            Player.onTrigger -= Triggered;
-        }
-
-        public void Triggered(Counter tra)
-        {
-            log.text = $"{tra.name} enabled: {tra.enabled}";
+            GameAnalytics.Initialize();
+            GameAnalytics.NewProgressionEvent(GAProgressionStatus.Start, "World0001");
         }
 
         private void Update()
@@ -31,10 +22,6 @@ namespace Game.Managers
             if (Input.GetMouseButtonDown(1))
                 reloadLevel();
 #endif
-        }
-
-        private void InitializeGame()
-        {
         }
 
         public void GameOver()
