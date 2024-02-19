@@ -3,19 +3,12 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using DG.Tweening;
 using TMPro;
-using GameAnalyticsSDK;
 
 namespace Game.Managers
 {
 
     public class GameManager : Singleton<GameManager>
     {
-        private void Start()
-        {
-            GameAnalytics.Initialize();
-            GameAnalytics.NewProgressionEvent(GAProgressionStatus.Start, "World0001");
-        }
-
         private void Update()
         {
 #if UNITY_EDITOR
