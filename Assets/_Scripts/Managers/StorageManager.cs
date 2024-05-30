@@ -145,7 +145,7 @@ namespace Game.Managers
         public float MusicVolume = 0.6f;
         public bool UseHaptic = true;
 
-        public int PlayerWallet = 5000;
+        public int PlayerWallet = 100;
         public int PlayerSpeedLevel = 0;
         public int PlayerStackLevel = 0;
         public int VIPLevel = 0;

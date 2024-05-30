@@ -175,7 +175,16 @@ public class Player : Character
         if (m_CurrentCounter.ItemOut(out var item))
         {
             item.OnItemIn(transform, 0);
-            this.DelayedAction(() => m_PoolManager.Enqueue(ePoolType.Cash, item.gameObject), 0.5f);
+            this.DelayedAction(() =>
+            {
+                m_PoolManager.Enqueue(ePoolType.Cash, item.gameObject);
+            }, 0.5f);
+        }
+        if (m_CurrentCounter.m_CashCounter.CashCollected > 0)
+        {
+            m_Wallet += m_CurrentCounter.m_CashCounter.CashCollected;
+            m_CurrentCounter.m_CashCounter.CashCollected = 0;
+            m_StorageManager.SetWallet(m_Wallet);
         }
     }
 

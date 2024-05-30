@@ -149,7 +149,7 @@ public class Customer : Character, IPoolable
 
     private void arrivedAtDestination()
     {
-        Invoke("Frustrate", Random.Range(5f, 10f));
+        Invoke("Frustrate", 360);
         switch (m_CustomerState)
         {
             case eCustomerState.Shopping:

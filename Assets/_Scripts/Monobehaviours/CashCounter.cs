@@ -30,7 +30,7 @@ public class CashCounter : Counter, IUnlockable
         private Vector3 m_Extent;
         #endregion
 
-    [Min(1), SerializeField] private int UnlockCost;
+    [Min(0), SerializeField] private int UnlockCost;
     private int m_UnlockIndex;
     #endregion
 
